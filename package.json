@@ -1,0 +1,20 @@
+{
+  "name": "aladino",
+  "version": "1.0.2",
+  "description": "Aladino is a tiny and dependency-free javascript library that allows to enhance your site using shader effects",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "http-server .",
+    "build": "microbundle -i src/index.js -o dist/aladino.umd.js --compress --sourcemap false"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:luruke/aladino.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^0.12.1",
+    "microbundle": "^0.11.0"
+  }
+}

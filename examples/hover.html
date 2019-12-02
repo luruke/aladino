@@ -1,0 +1,212 @@
+<html>
+
+<head>
+  <title>Aladino</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    article {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70vw;
+      height: 50vh;
+    }
+
+    article img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .b {
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    article:hover .b {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <article>
+    <img class="a" src="assets/images/1.jpg" />
+    <img class="b" src="assets/images/2.jpg" />
+  </article>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js" type="text/javascript"></script>
+  <script type="module">
+    import Aladino from '/src/index.js';
+
+    const aladino = new Aladino();
+    document.body.appendChild(aladino.canvas);
+
+    const material = aladino.material({
+      vertex: /* glsl */ `
+        attribute vec2 position;
+        attribute vec2 uv;
+
+        uniform mat4 projection;
+        varying vec2 vUv;
+
+        void main() {
+          vUv = uv;
+
+          gl_Position = projection * vec4(position, 0.0, 1.0);
+        }
+      `,
+      fragment: /* glsl */ `
+        precision highp float;
+
+        uniform vec2 size;
+        uniform float progress;
+        uniform vec2 sizeA;
+        uniform sampler2D a;
+        uniform vec2 sizeB;
+        uniform sampler2D b;
+
+        varying vec2 vUv;
+        varying float vPos;
+
+        vec4 coverTexture(sampler2D tex, vec2 imgSize, vec2 ouv) {
+          vec2 s = size;
+          vec2 i = imgSize;
+
+          float rs = s.x / s.y;
+          float ri = i.x / i.y;
+          vec2 new = rs < ri ? vec2(i.x * s.y / i.y, s.y) : vec2(s.x, i.y * s.x / i.x);
+          vec2 offset = (rs < ri ? vec2((new.x - s.x) / 2.0, 0.0) : vec2(0.0, (new.y - s.y) / 2.0)) / new;
+          vec2 uv = ouv * s / new + offset;
+        
+          return texture2D(tex, uv);
+        }
+
+        vec4 getFromColor(vec2 p) {
+          return coverTexture(a, sizeA, p);
+        }
+
+        vec4 getToColor(vec2 p) {
+          return coverTexture(b, sizeB, p);
+        }
+
+        // https://gl-transitions.com/editor/ColourDistance
+        // License: MIT
+        // Author: rectalogic
+        // ported by gre from https://gist.github.com/rectalogic/b86b90161503a0023231
+
+        // Converted from https://github.com/rectalogic/rendermix-basic-effects/blob/master/assets/com/rendermix/CrossZoom/CrossZoom.frag
+        // Which is based on https://github.com/evanw/glfx.js/blob/master/src/filters/blur/zoomblur.js
+        // With additional easing functions from https://github.com/rectalogic/rendermix-basic-effects/blob/master/assets/com/rendermix/Easing/Easing.glsllib
+
+        const float strength = 0.4;
+        const float PI = 3.141592653589793;
+
+        float Linear_ease(in float begin, in float change, in float duration, in float time) {
+            return change * time / duration + begin;
+        }
+
+        float Exponential_easeInOut(in float begin, in float change, in float duration, in float time) {
+            if (time == 0.0)
+                return begin;
+            else if (time == duration)
+                return begin + change;
+            time = time / (duration / 2.0);
+            if (time < 1.0)
+                return change / 2.0 * pow(2.0, 10.0 * (time - 1.0)) + begin;
+            return change / 2.0 * (-pow(2.0, -10.0 * (time - 1.0)) + 2.0) + begin;
+        }
+
+        float Sinusoidal_easeInOut(in float begin, in float change, in float duration, in float time) {
+            return -change / 2.0 * (cos(PI * time / duration) - 1.0) + begin;
+        }
+
+        float rand (vec2 co) {
+          return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+        }
+
+        vec3 crossFade(in vec2 uv, in float dissolve) {
+            return mix(getFromColor(uv).rgb, getToColor(uv).rgb, dissolve);
+        }
+
+        vec4 transition(vec2 uv) {
+            vec2 texCoord = uv.xy / vec2(1.0).xy;
+
+            // Linear interpolate center across center half of the image
+            vec2 center = vec2(Linear_ease(0.25, 0.5, 1.0, progress), 0.5);
+            float dissolve = Exponential_easeInOut(0.0, 1.0, 1.0, progress);
+
+            // Mirrored sinusoidal loop. 0->strength then strength->0
+            float strength = Sinusoidal_easeInOut(0.0, strength, 0.5, progress);
+
+            vec3 color = vec3(0.0);
+            float total = 0.0;
+            vec2 toCenter = center - texCoord;
+
+            /* randomize the lookup values to hide the fixed number of samples */
+            float offset = rand(uv);
+
+            for (float t = 0.0; t <= 40.0; t++) {
+                float percent = (t + offset) / 40.0;
+                float weight = 4.0 * (percent - percent * percent);
+                color += crossFade(texCoord + toCenter * percent * strength, dissolve) * weight;
+                total += weight;
+            }
+            return vec4(color / total, 1.0);
+        }
+
+        void main() {
+          vec2 s = vUv;
+
+          gl_FragColor = transition(vUv);
+        }
+      `,
+      uniforms: {
+        progress: 0,
+      }
+    });
+
+    const el = document.querySelector('article');
+
+    const carpet = aladino.carpet(el, {
+      material,
+      uniforms: {
+        a: aladino.texture(document.querySelector('.a').src),
+        b: aladino.texture(document.querySelector('.b').src),
+        progress: 0,
+      },
+    });
+
+    el.addEventListener('mouseenter', () => {
+      gsap.killTweensOf(carpet.uniforms);
+      gsap.to(carpet.uniforms, {
+        progress: 1,
+        duration: 1,
+      });
+    });
+
+    el.addEventListener('mouseleave', () => {
+      gsap.killTweensOf(carpet.uniforms);
+      gsap.to(carpet.uniforms, {
+        progress: 0,
+        duration: 1,
+      });
+    });
+  </script>
+</body>
+
+</html>

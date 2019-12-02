@@ -1,0 +1,150 @@
+<html>
+  <head>
+    <title>Aladino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .wrapper {
+        width: 80%;
+        padding: 0 40px;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 0;
+      }
+
+      img {
+        max-width: 100%;
+        margin: 40px 0;
+      }
+
+      canvas {
+        z-index: -1;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="wrapper">
+      <img src="assets/images/1.jpg">
+      <img src="assets/images/2.jpg">
+      <img src="assets/images/3.jpg">
+      <img src="assets/images/4.jpg">
+      <img src="assets/images/5.jpg">
+      <img src="assets/images/6.jpg">
+      <img src="assets/images/8.jpg">
+    </div>
+
+    <canvas></canvas>
+
+    <script type="module">
+      import Aladino from '/src/index.js';
+      import lerp from './assets/lerp.js';
+
+      const aladino = new Aladino({
+        canvas: document.querySelector('canvas'),
+        density: 20,
+      });
+
+      const images = [...document.querySelectorAll('img')];
+      const material = aladino.material({
+        vertex: /* glsl */ `
+          attribute vec2 position;
+          attribute vec2 uv;
+
+          uniform mat4 projection;
+          uniform float time;
+
+          uniform float speed;
+
+          varying vec2 vUv;
+          varying float intensity;
+
+          float parabola( float x, float k ) {
+            return pow( 4.0*x*(1.0-x), k );
+          }
+
+          void main() {
+            vUv = uv;
+
+            vec4 pos = vec4(position, 0.0, 1.0);
+
+            vec4 pp = projection * vec4(position, 0.0, 1.0);
+            float yy = ((pp / pp.w).y + 1.0) / 2.0;
+            pos.z += parabola(clamp(yy, 0.0, 1.0), 0.8) * speed;
+
+            intensity = pos.z;
+
+            gl_Position = projection * pos;
+          }
+        `,
+        fragment: /* glsl */ `
+          precision highp float;
+
+          uniform vec2 size;
+          uniform vec2 sizeImage;
+          uniform sampler2D image;
+          varying float intensity;
+
+          varying vec2 vUv;
+
+          vec4 coverTexture(vec2 ruv) {
+            vec2 s = size;
+            vec2 i = sizeImage;
+
+            float rs = s.x / s.y;
+            float ri = i.x / i.y;
+            vec2 new = rs < ri ? vec2(i.x * s.y / i.y, s.y) : vec2(s.x, i.y * s.x / i.x);
+            vec2 offset = (rs < ri ? vec2((new.x - s.x) / 2.0, 0.0) : vec2(0.0, (new.y - s.y) / 2.0)) / new;
+            vec2 uv = ruv * s / new + offset;
+          
+            return texture2D(image, uv);
+          }
+
+          void main() {
+            vec2 coords = vUv;
+
+            coords -= 0.5;
+            coords *= 0.8 + (intensity * 0.05);
+            coords += 0.5;
+
+            gl_FragColor = coverTexture(coords);
+          }
+        `,
+        uniforms: {
+          speed: 0,
+        }
+      });
+
+      images.forEach((el, index) => {
+        aladino.carpet(el, {
+          material,
+          uniforms: {
+            image: aladino.texture(el.src),
+          },
+        });
+      });
+
+      let oldPos = aladino.y;
+      let speed = 0;
+
+      const update = () => {
+        requestAnimationFrame(update);
+
+        speed = (aladino.y - oldPos) * .1;
+        material.uniforms.speed = lerp(material.uniforms.speed, speed * 0.2, .06);
+        oldPos = aladino.y;
+      }
+
+      update();
+    </script> 
+  </body>
+</html>

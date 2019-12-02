@@ -1,0 +1,187 @@
+<html>
+
+<head>
+  <title>Aladino</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .wrapper {
+      width: 100%;
+      padding: 0 40px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    article {
+      width: 100%;
+      height: 60vh;
+    }
+
+    p {
+      margin: 40px 0;
+      line-height: 2;
+    }
+
+    article img {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad quasi molestiae sed commodi, reprehenderit cum ipsa voluptatibus minus sit fuga eos esse labore, doloribus enim ducimus, beatae eaque aperiam dicta.
+    Aut facere dolorem fuga. Aut reprehenderit ex accusantium earum beatae? Neque nisi sed deserunt nemo, facere velit qui saepe tenetur laudantium incidunt unde et iste blanditiis? Omnis quo consectetur ad?
+    In placeat pariatur sapiente animi est. Similique, ducimus. Esse aliquid aperiam accusamus accusantium aut, tempora ipsam dolor eius ipsa laboriosam deserunt vitae quia illo ea earum ut. Consequatur, id temporibus?</p>
+
+    <article>
+      <img src="assets/images/6.jpg" />
+    </article>
+
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad quasi molestiae sed commodi, reprehenderit cum ipsa
+      voluptatibus minus sit fuga eos esse labore, doloribus enim ducimus, beatae eaque aperiam dicta.
+      Aut facere dolorem fuga. Aut reprehenderit ex accusantium earum beatae? Neque nisi sed deserunt nemo, facere velit
+      qui saepe tenetur laudantium incidunt unde et iste blanditiis? Omnis quo consectetur ad?
+      In placeat pariatur sapiente animi est. Similique, ducimus. Esse aliquid aperiam accusamus accusantium aut,
+      tempora ipsam dolor eius ipsa laboriosam deserunt vitae quia illo ea earum ut. Consequatur, id temporibus?</p>
+
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad quasi molestiae sed commodi, reprehenderit cum ipsa
+      voluptatibus minus sit fuga eos esse labore, doloribus enim ducimus, beatae eaque aperiam dicta.
+      Aut facere dolorem fuga. Aut reprehenderit ex accusantium earum beatae? Neque nisi sed deserunt nemo, facere velit
+      qui saepe tenetur laudantium incidunt unde et iste blanditiis? Omnis quo consectetur ad?
+      In placeat pariatur sapiente animi est. Similique, ducimus. Esse aliquid aperiam accusamus accusantium aut,
+      tempora ipsam dolor eius ipsa laboriosam deserunt vitae quia illo ea earum ut. Consequatur, id temporibus?</p>
+  </div>
+
+  <script src="https://unpkg.com/math-toolbox/dist/math-toolbox.umd.min.js"></script>
+
+  <script type="module">
+    import Aladino from '/src/index.js';
+    import Pointer from './assets/pointer.js';
+    import lerp from './assets/lerp.js';
+
+    const pointer = new Pointer();
+
+    const aladino = new Aladino({
+      density: 100,
+    });
+
+    document.body.appendChild(aladino.canvas);
+
+    const material = aladino.material({
+      vertex: /* glsl */ `
+        attribute vec2 position;
+        attribute vec2 uv;
+
+        uniform mat4 projection;
+        uniform float time;
+        uniform vec2 viewport;
+        uniform vec2 pointer;
+
+        varying vec2 vUv;
+        varying float vDist;
+
+        void main() {
+          vUv = uv;
+
+          float aspect = viewport.x / viewport.y;
+          vec4 pos = vec4(position, 0.0, 1.0);
+
+          vec4 pp = projection * vec4(position, 0.0, 1.0);
+          pp /= pp.w;
+
+          pp.y /= aspect;
+
+          float dist = distance(pointer, pp.xy);
+          
+          float v = smoothstep(0.3, 0.0, dist);
+          vDist = v;
+
+          pos.xyz *= 1.0 + (v * 0.14);
+          pos.z += sin(uv.x + uv.y * 2.0 + time * 0.002) * 0.2;
+
+          gl_Position = projection * pos;
+        }
+      `,
+      fragment: /* glsl */ `
+        precision highp float;
+
+        uniform vec2 size;
+
+        uniform vec2 sizeImage;
+        uniform sampler2D image;
+
+        varying vec2 vUv;
+        varying float vDist;
+
+        vec4 coverTexture(sampler2D tex, vec2 imgSize, vec2 ouv) {
+          vec2 s = size;
+          vec2 i = imgSize;
+
+          float rs = s.x / s.y;
+          float ri = i.x / i.y;
+          vec2 new = rs < ri ? vec2(i.x * s.y / i.y, s.y) : vec2(s.x, i.y * s.x / i.x);
+          vec2 offset = (rs < ri ? vec2((new.x - s.x) / 2.0, 0.0) : vec2(0.0, (new.y - s.y) / 2.0)) / new;
+          vec2 uv = ouv * s / new + offset;
+        
+          return texture2D(tex, uv);
+        }
+
+        void main() {
+          vec3 j = vec3(1.0, 0.580392, 0.619607);
+          vec3 k = vec3(0.9411764, 0.517647, 0.552941);
+          vec3 l = vec3(1.0, 0.729411, 0.749019);
+          vec3 m = vec3(0.949019, 0.949019, 0.949019);
+
+          vec3 color = vec3(0.0, 0.0, 0.0);
+
+          float z = vDist;
+          color = mix(j, k, smoothstep(0.0, 0.23, z));
+          color = mix(color, j, smoothstep(0.13, 0.6, z));
+          color = mix(color, l, smoothstep(0.5, 1.0, z));
+
+          vec4 img = coverTexture(image, sizeImage, vUv);
+          const vec3 W = vec3(0.2125, 0.7154, 0.0721);
+          float luma = dot(img.rgb, W);
+
+          gl_FragColor = mix(
+            img,
+            vec4(color, 1.0)
+          , 0.4);
+        }
+      `,
+    });
+
+    const el = document.querySelector('article');
+
+    const carpet = aladino.carpet(el, {
+      material,
+      uniforms: {
+        image: aladino.texture(el.querySelector('img').src),
+        pointer: [0, 0],
+      },
+    });
+
+    const update = () => {
+      requestAnimationFrame(update);
+      const smooth = .2;
+      carpet.uniforms.pointer[0] = lerp(carpet.uniforms.pointer[0], pointer.ndc[0], smooth);
+      carpet.uniforms.pointer[1] = lerp(carpet.uniforms.pointer[1], pointer.ndc[1], smooth);
+    }
+
+    update();
+  </script>
+</body>
+</html>

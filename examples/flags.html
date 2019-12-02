@@ -1,0 +1,152 @@
+<html>
+  <head>
+    <title>Aladino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .wrapper {
+        width: 100%;
+        padding: 0 40px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      img {
+        width: 70%;
+        margin: 0 auto;
+        display: block;
+        margin: 20px auto;
+      }
+
+      p {
+        margin: 40px 0;
+        line-height: 2;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="wrapper">
+      <img src="assets/images/3.jpg">
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod, obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.</p>
+      <img src="assets/images/4.jpg">
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod, obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.</p>
+      <img src="assets/images/1.jpg">
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod, obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.</p>
+      <img src="assets/images/2.jpg">
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod, obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.</p>
+      <img src="assets/images/5.jpg">
+    </div>
+
+    <script type="module">
+      import Aladino from '/src/index.js';
+
+      const aladino = new Aladino({
+        density: 20,
+      });
+
+      document.body.appendChild(aladino.canvas);
+
+      const imgs = [...document.querySelectorAll('img')];
+      const material = aladino.material({
+        vertex: /* glsl */ `
+          attribute vec2 position;
+          attribute vec2 uv;
+
+          uniform mat4 projection;
+          uniform float time;
+
+          uniform float uSpeed;
+
+          varying vec2 vUv;
+          varying vec3 vPos;
+
+          float parabola( float x, float k )
+          {
+              return pow( 4.0*x*(1.0-x), k );
+          }
+
+          mat4 rotationMatrix(vec3 axis, float angle) {
+            axis = normalize(axis);
+            float s = sin(angle);
+            float c = cos(angle);
+            float oc = 1.0 - c;
+
+            return mat4(oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s, oc * axis.z * axis.x + axis.y * s, 0.0,
+            oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c, oc * axis.y * axis.z - axis.x * s, 0.0,
+            oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s, oc * axis.z * axis.z + c, 0.0,
+            0.0, 0.0, 0.0, 1.0);
+          }
+
+          void main() {
+            vUv = uv;
+
+            float pulse = sin(time * 0.002 + uv.y * 4.0);
+            pulse += sin(time * 0.0023 + uv.x * 3.21);
+
+            vec4 pos = vec4(position, pulse * .3, 1.0);
+
+            pos = rotationMatrix(vec3(1.0, 0.0, 0.0), 0.3) * pos;
+
+            vPos = pos.xyz;
+
+            gl_Position = projection * pos;
+          }
+        `,
+        fragment: /* glsl */ `
+          precision highp float;
+
+          uniform vec2 size;
+          uniform vec2 sizeImage;
+          uniform sampler2D image;
+
+          varying vec2 vUv;
+          varying vec3 vPos;
+
+          vec4 coverTexture(vec2 ruv) {
+            vec2 s = size;
+            vec2 i = sizeImage;
+
+            float rs = s.x / s.y;
+            float ri = i.x / i.y;
+            vec2 new = rs < ri ? vec2(i.x * s.y / i.y, s.y) : vec2(s.x, i.y * s.x / i.x);
+            vec2 offset = (rs < ri ? vec2((new.x - s.x) / 2.0, 0.0) : vec2(0.0, (new.y - s.y) / 2.0)) / new;
+            vec2 uv = ruv * s / new + offset;
+          
+            return texture2D(image, uv);
+          }
+
+          void main() {
+            gl_FragColor = coverTexture(vUv);
+
+            gl_FragColor.rgb *= smoothstep(-2.0, 2.0, vPos.z);
+
+            //gl_FragColor *= vPos.z;
+          }
+        `,
+        uniforms: {
+          uSpeed: 2.0,
+        }
+      });
+
+
+      imgs.forEach(el => {
+        aladino.carpet(el, {
+          material,
+          uniforms: {
+            image: aladino.texture(el.src),
+          },
+        });
+      });
+    </script> 
+  </body>
+</html>

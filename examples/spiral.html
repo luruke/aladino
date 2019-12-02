@@ -1,0 +1,135 @@
+<html>
+  <head>
+    <title>Aladino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .wrapper {
+        width: 100%;
+        padding: 0 40px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      article {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 30vw;
+        height: 60vh;
+      }
+
+      img {
+        position: absolute;
+        max-width: 300px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <article>
+        <img class="a" src="assets/images/4.jpg">
+        <img class="b" src="assets/images/3.jpg">
+      </article>
+    </div>
+
+    <script type="module">
+      import Aladino from '/src/index.js';
+
+      const aladino = new Aladino({
+        density: 20,
+      });
+
+      document.body.appendChild(aladino.canvas);
+
+      const material = aladino.material({
+        vertex: /* glsl */ `
+          attribute vec2 position;
+          attribute vec2 uv;
+
+          uniform mat4 projection;
+          uniform float time;
+
+          varying vec2 vUv;
+
+          mat4 rotationMatrix(vec3 axis, float angle) {
+            axis = normalize(axis);
+            float s = sin(angle);
+            float c = cos(angle);
+            float oc = 1.0 - c;
+
+            return mat4(oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s, oc * axis.z * axis.x + axis.y * s, 0.0,
+            oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c, oc * axis.y * axis.z - axis.x * s, 0.0,
+            oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s, oc * axis.z * axis.z + c, 0.0,
+            0.0, 0.0, 0.0, 1.0);
+          }
+
+          void main() {
+            vUv = uv;
+
+            vec4 pos = vec4(position, 0.0, 1.0);
+            float angle = uv.x + uv.y + time * 0.001;
+            pos = rotationMatrix(vec3(0.2, 1.0, 0.0), angle) * pos;
+
+            gl_Position = projection * pos;
+          }
+        `,
+        fragment: /* glsl */ `
+          precision highp float;
+
+          uniform vec2 size;
+
+          uniform vec2 sizeFront;
+          uniform sampler2D front;
+
+          uniform vec2 sizeBack;
+          uniform sampler2D back;
+
+          varying vec2 vUv;
+
+          vec4 coverTexture(sampler2D tex, vec2 imgSize, vec2 ouv) {
+            vec2 s = size;
+            vec2 i = imgSize;
+
+            float rs = s.x / s.y;
+            float ri = i.x / i.y;
+            vec2 new = rs < ri ? vec2(i.x * s.y / i.y, s.y) : vec2(s.x, i.y * s.x / i.x);
+            vec2 offset = (rs < ri ? vec2((new.x - s.x) / 2.0, 0.0) : vec2(0.0, (new.y - s.y) / 2.0)) / new;
+            vec2 uv = ouv * s / new + offset;
+          
+            return texture2D(tex, uv);
+          }
+
+          void main() {
+            if (gl_FrontFacing) {
+              gl_FragColor = coverTexture(front, sizeFront, vUv);
+            } else {
+              gl_FragColor = coverTexture(back, sizeBack, vUv);
+            }
+          }
+        `,
+      });
+
+      const el = document.querySelector('article');
+
+      aladino.carpet(el, {
+        material,
+        uniforms: {
+          front: aladino.texture(el.querySelector('.a').src),
+          back: aladino.texture(el.querySelector('.b').src),
+        },
+      });
+    </script>
+  </body>
+</html>

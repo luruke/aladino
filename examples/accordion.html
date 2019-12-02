@@ -1,0 +1,138 @@
+<html>
+  <head>
+    <title>Aladino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      article {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 70vw;
+        height: 50vh;
+      }
+
+      article img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <article>
+      <img src="assets/images/1.jpg" />
+    </article>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js" type="text/javascript"></script>
+    <script type="module">
+      import Aladino from '/src/index.js';
+
+      const aladino = new Aladino({
+        density: 200,
+      });
+
+      document.body.appendChild(aladino.canvas);
+
+      const material = aladino.material({
+        vertex: /* glsl */ `
+          attribute vec2 position;
+          attribute vec2 uv;
+
+          uniform mat4 projection;
+          uniform float time;
+          uniform float hover;
+
+          varying vec2 vUv;
+          varying float vPos;
+
+          float parabola( float x, float k ) {
+            return pow( 4.0*x*(1.0-x), k );
+          }
+
+          void main() {
+            vUv = uv;
+
+            vec4 pos = vec4(position, 0.0, 1.0);
+
+            pos.z = mix(sin(uv.x * 100.0) * 0.3, pos.z, hover);
+            pos.x *= mix((1.0 - parabola(uv.y, 0.5) * 0.2) * 0.5, 1.0, hover);
+
+            vPos = pos.z;
+
+            gl_Position = projection * pos;
+          }
+        `,
+        fragment: /* glsl */ `
+          precision highp float;
+
+          uniform vec2 size;
+          uniform vec2 sizeImage;
+          uniform sampler2D image;
+
+          varying vec2 vUv;
+          varying float vPos;
+
+          vec4 coverTexture(sampler2D tex, vec2 imgSize, vec2 ouv) {
+            vec2 s = size;
+            vec2 i = imgSize;
+
+            float rs = s.x / s.y;
+            float ri = i.x / i.y;
+            vec2 new = rs < ri ? vec2(i.x * s.y / i.y, s.y) : vec2(s.x, i.y * s.x / i.x);
+            vec2 offset = (rs < ri ? vec2((new.x - s.x) / 2.0, 0.0) : vec2(0.0, (new.y - s.y) / 2.0)) / new;
+            vec2 uv = ouv * s / new + offset;
+          
+            return texture2D(tex, uv);
+          }
+
+          void main() {
+            vec2 s = vUv;
+
+            gl_FragColor = coverTexture(image, sizeImage, s);
+
+            gl_FragColor.rgb *= 1.0 - smoothstep(0.0, -1.0, vPos);
+          }
+        `,
+      });
+
+      const el = document.querySelector('article');
+
+      const carpet = aladino.carpet(el, {
+        material,
+        uniforms: {
+          image: aladino.texture(el.querySelector('img').src),
+          hover: 0,
+        },
+      });
+
+      el.addEventListener('mouseenter', () => {
+        gsap.killTweensOf(carpet.uniforms);
+        gsap.to(carpet.uniforms, {
+          hover: 1,
+          duration: 1,
+          ease: 'elastic.out(1.0, 0.5)'
+        });
+      });
+
+      el.addEventListener('mouseleave', () => {
+        gsap.killTweensOf(carpet.uniforms);
+        gsap.to(carpet.uniforms, {
+          hover: 0,
+          duration: 2,
+          ease: 'elastic.out(1.0, 0.5)'
+        });
+      });
+    </script>
+  </body>
+</html>

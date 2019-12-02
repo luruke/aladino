@@ -1,0 +1,221 @@
+<html>
+
+<head>
+  <title>Aladino</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-size: 0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      
+      .wrapper {
+        padding: 30px;
+        columns: 4;
+        column-gap: 30px;
+        column-fill: initial;
+      }
+
+      .brick {
+        display: inline-block;
+        vertical-align: top;
+        height: 0;
+        margin-bottom: 30px;
+        background: black;
+        width: 100%;
+      }
+
+      img {
+        width: 100%;
+        height: auto;
+      }
+
+      canvas {
+        z-index: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper">
+    </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js" type="text/javascript"></script>
+  <script type="module">
+    import Aladino from '/src/index.js';
+    import lerp from './assets/lerp.js';
+
+    const random = (min, max) => {
+      return Math.floor(Math.random() * (+max - +min)) + +min;
+    };
+
+    const wrapper = document.querySelector('.wrapper');
+    for (let i = 0; i < 50; i++) {
+      const div = document.createElement('div');
+            div.classList.add('brick');
+
+      const width = random(500, 900);
+      const height = random(800, 1000);
+      const img = document.createElement('img');
+            img.dataset.src = `https://source.unsplash.com/random/${width}x${height}`;
+            img.width = width;
+            img.height = height;
+
+      div.style.paddingBottom = `${(height / width) * 100 }%`;
+
+      div.appendChild(img);
+      wrapper.appendChild(div);
+    }
+
+    const aladino = new Aladino({
+      density: 10,
+    });
+
+    document.body.appendChild(aladino.canvas);
+
+    const material = aladino.material({
+      vertex: /* glsl */ `
+        attribute vec2 position;
+        attribute vec2 uv;
+
+        uniform mat4 projection;
+        uniform float speed;
+        uniform float boarding;
+
+        varying vec2 vUv;
+        varying float vY;
+
+        float parabola( float x, float k ) {
+          return pow( 4.0*x*(1.0-x), k );
+        }
+
+        void main() {
+          vUv = uv;
+
+          vec4 pos = vec4(position, 0.0, 1.0);
+
+          float spee = speed;
+          vec4 pp = projection * vec4(position, 0.0, 1.0);
+          float xx = ((pp / pp.w).x + 1.0) / 2.0;
+          float yy = ((pp / pp.w).y + 1.0) / 2.0;
+
+          vY = clamp(yy, 0.0, 1.0);
+
+          xx = parabola(clamp(xx, 0.0, 1.0), 1.2);
+          yy = parabola(clamp(yy, 0.0, 1.0), 1.2);
+
+          pos.z += (xx * mix(1.0, 2.0, spee)) * boarding;
+          pos.z += (yy * mix(1.0, 2.0, spee)) * boarding;
+
+
+          gl_Position = projection * pos;
+        }
+      `,
+      fragment: /* glsl */ `
+        precision highp float;
+
+        uniform vec2 size;
+
+        uniform vec2 sizeImage;
+        uniform sampler2D image;
+        uniform float show;
+        uniform float scale;
+
+        varying vec2 vUv;
+        varying float vY;
+
+        vec4 coverTexture(sampler2D tex, vec2 imgSize, vec2 ouv) {
+          vec2 s = size;
+          vec2 i = imgSize;
+
+          float rs = s.x / s.y;
+          float ri = i.x / i.y;
+          vec2 new = rs < ri ? vec2(i.x * s.y / i.y, s.y) : vec2(s.x, i.y * s.x / i.x);
+          vec2 offset = (rs < ri ? vec2((new.x - s.x) / 2.0, 0.0) : vec2(0.0, (new.y - s.y) / 2.0)) / new;
+          vec2 uv = ouv * s / new + offset;
+        
+          return texture2D(tex, uv);
+        }
+
+        void main() {
+          vec2 uv = vUv;
+
+          uv -= 0.5;
+          uv *= 0.4;
+          uv *= mix(0.90, 1.0, scale);
+          uv.y -= (1.0 - vY) * 0.4;
+          uv += 0.5;
+
+          vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+          color.rgb += mix(color.rgb, coverTexture(image, sizeImage, uv).rgb, show);
+
+          gl_FragColor = color;
+        }
+      `,
+      uniforms: {
+        speed: 0,
+        boarding: 0,
+      }
+    });
+
+    gsap.to(material.uniforms, {
+      boarding: 1,
+      duration: 7,
+      delay: 1,
+      ease: 'elastic.out(1, .1)'
+    });
+
+    const bricks = [...document.querySelectorAll('.brick')];
+    
+    bricks.forEach(brick => {
+      const image = aladino.texture(brick.querySelector('img').dataset.src);
+
+      const carpet = aladino.carpet(brick, {
+        material,
+        uniforms: {
+          image,
+          show: 0,
+          scale: 0,
+        },
+      });
+
+      image.loading.then(() => {
+        gsap.to(carpet.uniforms, {
+          show: 1,
+          duration: 2,
+        });
+
+        gsap.to(carpet.uniforms, {
+          scale: 1,
+          duration: 5,
+        });
+      })
+    });
+
+    let oldPos = aladino.y;
+    let speed = 0;
+
+    const update = () => {
+      requestAnimationFrame(update);
+
+      // aladino.post.uniforms.speed = lerp(aladino.post.uniforms.speed, speed, .04);
+      // material.uniforms.speed = lerp(material.uniforms.speed, speed, .04);
+
+      speed = (aladino.y - oldPos) * .1;
+      material.uniforms.speed = lerp(material.uniforms.speed, speed * 0.2, .03);
+      oldPos = aladino.y;
+    }
+
+    update();
+  </script>
+</body>
+
+</html>

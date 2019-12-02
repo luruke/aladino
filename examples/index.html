@@ -1,0 +1,149 @@
+<html>
+  <head>
+    <title>Aladino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Noto Sans", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      main {
+        display: flex;
+        width: 100%;
+        height: 100%;
+      }
+
+      iframe {
+        border: 0;
+        flex: 1;
+      }
+
+      aside {
+        border-right: 1px solid rgba(0, 0, 0, 0.04);
+        padding: 20px;
+        padding-right: 40px;
+        min-height: 100vh;
+        min-width: 280px;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      aside h1 {
+        margin: 0;
+        margin-bottom: 30px;
+        font-size: 20px;
+      }
+
+      aside a {
+        display: block;
+        font-size: 14px;
+        margin-top: 5px;
+      }
+
+      aside a.active {
+        font-weight: 700;
+      }
+
+      a,
+      a:active,
+      a:visited,
+      a:hover {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .edit {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        padding: 12px;
+        border-radius: 50%;
+        margin-bottom: 0px;
+        background-color: #fff;
+        opacity: 0.9;
+        z-index: 999;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <aside>
+        <h1>aladino examples</h1>
+        <a href="basic.html">Basic</a>
+        <a href="flags.html">Flags</a>
+        <a href="button.html">Buttons</a>
+        <a href="accordion.html">Accordion</a>
+        <a href="bump.html">Bump</a>
+        <a href="follow.html">Follow</a>
+        <a href="hover.html">Hover</a>
+        <a href="spiral.html">Spiral</a>
+        <a href="scroll.html">Scroll</a>
+        <a href="slider.html">Slider</a>
+        <a href="infinite.html">Infinite Slider</a>
+        <a href="grid.html">Grid</a>
+      </aside>
+
+      <iframe class="iframe" allow="autoplay" src=""></iframe>
+
+      <a class="edit" href="" target="_blank">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24px"
+          height="24px"
+          viewBox="0 0 24 24"
+          fill="#000000"
+        >
+          <path fill="none" d="M0 0h24v24H0V0z" />
+          <path
+            d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"
+          />
+        </svg>
+      </a>
+    </main>
+
+    <script>
+      const links = [...document.querySelectorAll("aside a")];
+      const iframe = document.querySelector(".iframe");
+      const edit = document.querySelector(".edit");
+
+      const update = () => {
+        current = location.hash
+          ? location.hash.substring(1)
+          : links[0].getAttribute("href");
+        iframe.src = current;
+
+        links.forEach((l) => l.classList.remove("active"));
+
+        const link = document.querySelector(`a[href='${current}']`);
+        link.classList.add("active");
+
+        edit.href = `https://github.com/luruke/aladino/examples/${current}`;
+      };
+
+      links.forEach((link) => {
+        link.addEventListener("click", (e) => {
+          if (e.which > 1 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
+            return false;
+
+          e.preventDefault();
+          location.hash = link.getAttribute("href");
+        });
+      });
+
+      window.addEventListener("popstate", update);
+      update();
+    </script>
+  </body>
+</html>
