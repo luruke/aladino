@@ -11,9 +11,9 @@ It was developed during some R&D time at [EPIC Agency](https://epic.net), back i
 - [https://luruke.com](https://luruke.com)
 
 <p float="left">
-  <img src="examples/assets/demo/1.gif" width="250" />
-  <img src="examples/assets/demo/2.gif" width="250" /> 
-  <img src="examples/assets/demo/3.gif" width="250" />
+  <img src="docs/assets/demo/1.gif" width="250" />
+  <img src="docs/assets/demo/2.gif" width="250" /> 
+  <img src="docs/assets/demo/3.gif" width="250" />
 </p>
 
 ## 🤷‍ Even why?
@@ -287,12 +287,11 @@ Usually the biggest "price to pay" for this technique is the compositing phase b
 
 ## 🔨 TODO
 
-- Typescript definitions
-- Support video texture
+- Support video texture?
 - Add a method to verify WebGL support?
 - Test canvas position fixed vs `transform: translate()`?
 - Culling?
 - Blending modes?
 - Support text?
 - Create components for react / vue.js?
-- See if magicshader can be implemented easily using raw webgl?
+- See if magicshader can be implemented easily?
