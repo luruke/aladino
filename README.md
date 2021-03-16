@@ -272,7 +272,7 @@ If you encour in performance issues:
 
 - Try to lower dpr.
 - Try to lower geometry density.
-- Try to disable antialias. (Expecially on retina displays)
+- Try to disable antialias. (Expecially on retina displays, you might want to look into use `GL_OES_standard_derivatives` instead)
 - Try to share the same Material as much as possible on your carpets.
 - When possible, share uniforms per program then per single carpet.
 - Prefer vertex calculation then per pixel, exploiting the linear interpolation given by varyings variables.
