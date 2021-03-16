@@ -1,10 +1,12 @@
 <html>
+  <head>
+    <title>Aladino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-  <title>Aladino</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/flickity@2/dist/flickity.min.css"
+    />
     <style>
       html,
       body {
@@ -51,61 +53,64 @@
     <div class="wrapper">
       <div class="carousel">
         <div class="cell">
-          <img src="assets/images/1.jpg">
+          <img src="assets/images/1.jpg" />
         </div>
         <div class="cell">
-          <img src="assets/images/2.jpg">
+          <img src="assets/images/2.jpg" />
         </div>
         <div class="cell">
-          <img src="assets/images/4.jpg">
+          <img src="assets/images/4.jpg" />
         </div>
         <div class="cell">
-          <img src="assets/images/5.jpg">
+          <img src="assets/images/5.jpg" />
         </div>
         <div class="cell">
-          <img src="assets/images/6.jpg">
+          <img src="assets/images/6.jpg" />
         </div>
         <div class="cell">
-          <img src="assets/images/8.jpg">
+          <img src="assets/images/8.jpg" />
         </div>
       </div>
     </div>
 
+    <script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script>
 
-  <script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script>
+    <script type="module">
+      import Aladino from "./src/index.js";
+      import lerp from "./assets/lerp.js";
 
-  <script type="module">
-    import Aladino from '/src/index.js';
-    import lerp from './assets/lerp.js';
+      const flkty = new Flickity(document.querySelector(".carousel"), {
+        freeScroll: true,
+        dragThreshold: 0,
+        freeScrollFriction: 0.07,
+        prevNextButtons: false,
+        pageDots: false,
+      });
 
-    const flkty = new Flickity(document.querySelector('.carousel'), {
-      freeScroll: true,
-      dragThreshold: 0,
-      freeScrollFriction: 0.07,
-      prevNextButtons: false,
-      pageDots: false,
-    });
+      const isFF = navigator.userAgent.indexOf("Firefox") > -1;
 
-    const isFF = navigator.userAgent.indexOf('Firefox') > -1;
+      document.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
 
-    document.addEventListener('wheel', e => {
-      e.preventDefault();
+          let y = e.wheelDeltaY || e.deltaY * -1;
 
-      let y = e.wheelDeltaY || e.deltaY * -1;
+          if (isFF) {
+            y *= 5;
+          }
 
-      if (isFF) {
-        y *= 5;
-      }
+          flkty.applyForce(y * 0.03);
+          flkty.startAnimation();
+          flkty.dragEnd();
+        },
+        { passive: false }
+      );
 
-      flkty.applyForce(y * 0.03);
-      flkty.startAnimation();
-      flkty.dragEnd();
-    }, { passive: false });
-
-    const aladino = new Aladino({
-      density: 20,
-      post: {
-        fragment: /* glsl */ `
+      const aladino = new Aladino({
+        density: 20,
+        post: {
+          fragment: /* glsl */ `
           precision highp float;
           
           uniform float time;
@@ -135,16 +140,16 @@
             gl_FragColor.rgb *= 1.0 - (n * 0.2);
           }
         `,
-        uniforms: {
-          speed: 0.0,
-        }
-      }
-    });
+          uniforms: {
+            speed: 0.0,
+          },
+        },
+      });
 
-    document.body.appendChild(aladino.canvas);
+      document.body.appendChild(aladino.canvas);
 
-    const material = aladino.material({
-      vertex: /* glsl */ `
+      const material = aladino.material({
+        vertex: /* glsl */ `
         attribute vec2 position;
         attribute vec2 uv;
 
@@ -177,7 +182,7 @@
           gl_Position = projection * pos;
         }
       `,
-      fragment: /* glsl */ `
+        fragment: /* glsl */ `
         precision highp float;
 
         uniform vec2 size;
@@ -204,49 +209,52 @@
           gl_FragColor = coverTexture(image, sizeImage, vUv);
         }
       `,
-      uniforms: {
-        speed: 0,
-        speed2: 0
-      }
-    });
-
-    const cells = [...document.querySelectorAll('.cell')];
-    const carpets = [];
-    cells.forEach(cell => {
-      const carpet = aladino.carpet(cell, {
-        material,
         uniforms: {
-          image: aladino.texture(cell.querySelector('img').src),
+          speed: 0,
+          speed2: 0,
         },
       });
 
-      carpets.push(carpet);
-    });
+      const cells = [...document.querySelectorAll(".cell")];
+      const carpets = [];
+      cells.forEach((cell) => {
+        const carpet = aladino.carpet(cell, {
+          material,
+          uniforms: {
+            image: aladino.texture(cell.querySelector("img").src),
+          },
+        });
 
-    let oldProgress = 0;
-    let speed = 0;
-
-    flkty.on('scroll', progress => {
-      // The way flickity works doesn't allow an easy use of the position,
-      // So it can be optimised, as here we're recalculating dom boundingbox each time
-      carpets.forEach(carpet => {
-        carpet.resize();
+        carpets.push(carpet);
       });
 
-      speed = oldProgress - progress;
-      oldProgress = progress;
-    });
+      let oldProgress = 0;
+      let speed = 0;
 
-    const update = () => {
-      requestAnimationFrame(update);
+      flkty.on("scroll", (progress) => {
+        // The way flickity works doesn't allow an easy use of the position,
+        // So it can be optimised, as here we're recalculating dom boundingbox each time
+        carpets.forEach((carpet) => {
+          carpet.resize();
+        });
 
-      material.uniforms.speed = lerp(material.uniforms.speed, speed, .6);
-      material.uniforms.speed2 = lerp(material.uniforms.speed2, speed, .1);
-      aladino.post.uniforms.speed = lerp(aladino.post.uniforms.speed, speed, .1);
-    }
+        speed = oldProgress - progress;
+        oldProgress = progress;
+      });
 
-    update();
-  </script>
-</body>
+      const update = () => {
+        requestAnimationFrame(update);
 
+        material.uniforms.speed = lerp(material.uniforms.speed, speed, 0.6);
+        material.uniforms.speed2 = lerp(material.uniforms.speed2, speed, 0.1);
+        aladino.post.uniforms.speed = lerp(
+          aladino.post.uniforms.speed,
+          speed,
+          0.1
+        );
+      };
+
+      update();
+    </script>
+  </body>
 </html>

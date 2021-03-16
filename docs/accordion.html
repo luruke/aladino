@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>Aladino</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       html,
       body {
@@ -34,9 +34,12 @@
       <img src="assets/images/1.jpg" />
     </article>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js" type="text/javascript"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js"
+      type="text/javascript"
+    ></script>
     <script type="module">
-      import Aladino from '/src/index.js';
+      import Aladino from "./src/index.js";
 
       const aladino = new Aladino({
         density: 200,
@@ -106,31 +109,31 @@
         `,
       });
 
-      const el = document.querySelector('article');
+      const el = document.querySelector("article");
 
       const carpet = aladino.carpet(el, {
         material,
         uniforms: {
-          image: aladino.texture(el.querySelector('img').src),
+          image: aladino.texture(el.querySelector("img").src),
           hover: 0,
         },
       });
 
-      el.addEventListener('mouseenter', () => {
+      el.addEventListener("mouseenter", () => {
         gsap.killTweensOf(carpet.uniforms);
         gsap.to(carpet.uniforms, {
           hover: 1,
           duration: 1,
-          ease: 'elastic.out(1.0, 0.5)'
+          ease: "elastic.out(1.0, 0.5)",
         });
       });
 
-      el.addEventListener('mouseleave', () => {
+      el.addEventListener("mouseleave", () => {
         gsap.killTweensOf(carpet.uniforms);
         gsap.to(carpet.uniforms, {
           hover: 0,
           duration: 2,
-          ease: 'elastic.out(1.0, 0.5)'
+          ease: "elastic.out(1.0, 0.5)",
         });
       });
     </script>

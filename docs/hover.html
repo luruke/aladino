@@ -1,63 +1,65 @@
 <html>
+  <head>
+    <title>Aladino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
 
-<head>
-  <title>Aladino</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-    }
+      * {
+        box-sizing: border-box;
+      }
 
-    * {
-      box-sizing: border-box;
-    }
+      article {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 70vw;
+        height: 50vh;
+      }
 
-    article {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 70vw;
-      height: 50vh;
-    }
+      article img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
 
-    article img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+      .b {
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
 
-    .b {
-      opacity: 0;
-      transition: opacity .3s;
-    }
+      article:hover .b {
+        opacity: 1;
+      }
+    </style>
+  </head>
 
-    article:hover .b {
-      opacity: 1;
-    }
-  </style>
-</head>
+  <body>
+    <article>
+      <img class="a" src="assets/images/1.jpg" />
+      <img class="b" src="assets/images/2.jpg" />
+    </article>
 
-<body>
-  <article>
-    <img class="a" src="assets/images/1.jpg" />
-    <img class="b" src="assets/images/2.jpg" />
-  </article>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js"
+      type="text/javascript"
+    ></script>
+    <script type="module">
+      import Aladino from "./src/index.js";
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js" type="text/javascript"></script>
-  <script type="module">
-    import Aladino from '/src/index.js';
+      const aladino = new Aladino();
+      document.body.appendChild(aladino.canvas);
 
-    const aladino = new Aladino();
-    document.body.appendChild(aladino.canvas);
-
-    const material = aladino.material({
-      vertex: /* glsl */ `
+      const material = aladino.material({
+        vertex: /* glsl */ `
         attribute vec2 position;
         attribute vec2 uv;
 
@@ -70,7 +72,7 @@
           gl_Position = projection * vec4(position, 0.0, 1.0);
         }
       `,
-      fragment: /* glsl */ `
+        fragment: /* glsl */ `
         precision highp float;
 
         uniform vec2 size;
@@ -175,38 +177,37 @@
           gl_FragColor = transition(vUv);
         }
       `,
-      uniforms: {
-        progress: 0,
-      }
-    });
-
-    const el = document.querySelector('article');
-
-    const carpet = aladino.carpet(el, {
-      material,
-      uniforms: {
-        a: aladino.texture(document.querySelector('.a').src),
-        b: aladino.texture(document.querySelector('.b').src),
-        progress: 0,
-      },
-    });
-
-    el.addEventListener('mouseenter', () => {
-      gsap.killTweensOf(carpet.uniforms);
-      gsap.to(carpet.uniforms, {
-        progress: 1,
-        duration: 1,
+        uniforms: {
+          progress: 0,
+        },
       });
-    });
 
-    el.addEventListener('mouseleave', () => {
-      gsap.killTweensOf(carpet.uniforms);
-      gsap.to(carpet.uniforms, {
-        progress: 0,
-        duration: 1,
+      const el = document.querySelector("article");
+
+      const carpet = aladino.carpet(el, {
+        material,
+        uniforms: {
+          a: aladino.texture(document.querySelector(".a").src),
+          b: aladino.texture(document.querySelector(".b").src),
+          progress: 0,
+        },
       });
-    });
-  </script>
-</body>
 
+      el.addEventListener("mouseenter", () => {
+        gsap.killTweensOf(carpet.uniforms);
+        gsap.to(carpet.uniforms, {
+          progress: 1,
+          duration: 1,
+        });
+      });
+
+      el.addEventListener("mouseleave", () => {
+        gsap.killTweensOf(carpet.uniforms);
+        gsap.to(carpet.uniforms, {
+          progress: 0,
+          duration: 1,
+        });
+      });
+    </script>
+  </body>
 </html>

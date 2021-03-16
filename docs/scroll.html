@@ -1,9 +1,10 @@
 <html>
   <head>
     <title>Aladino</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-      html, body {
+      html,
+      body {
         margin: 0;
         padding: 0;
       }
@@ -32,29 +33,28 @@
   </head>
 
   <body>
-
     <div class="wrapper">
-      <img src="assets/images/1.jpg">
-      <img src="assets/images/2.jpg">
-      <img src="assets/images/3.jpg">
-      <img src="assets/images/4.jpg">
-      <img src="assets/images/5.jpg">
-      <img src="assets/images/6.jpg">
-      <img src="assets/images/8.jpg">
+      <img src="assets/images/1.jpg" />
+      <img src="assets/images/2.jpg" />
+      <img src="assets/images/3.jpg" />
+      <img src="assets/images/4.jpg" />
+      <img src="assets/images/5.jpg" />
+      <img src="assets/images/6.jpg" />
+      <img src="assets/images/8.jpg" />
     </div>
 
     <canvas></canvas>
 
     <script type="module">
-      import Aladino from '/src/index.js';
-      import lerp from './assets/lerp.js';
+      import Aladino from "./src/index.js";
+      import lerp from "./assets/lerp.js";
 
       const aladino = new Aladino({
-        canvas: document.querySelector('canvas'),
+        canvas: document.querySelector("canvas"),
         density: 20,
       });
 
-      const images = [...document.querySelectorAll('img')];
+      const images = [...document.querySelectorAll("img")];
       const material = aladino.material({
         vertex: /* glsl */ `
           attribute vec2 position;
@@ -121,7 +121,7 @@
         `,
         uniforms: {
           speed: 0,
-        }
+        },
       });
 
       images.forEach((el, index) => {
@@ -139,12 +139,16 @@
       const update = () => {
         requestAnimationFrame(update);
 
-        speed = (aladino.y - oldPos) * .1;
-        material.uniforms.speed = lerp(material.uniforms.speed, speed * 0.2, .06);
+        speed = (aladino.y - oldPos) * 0.1;
+        material.uniforms.speed = lerp(
+          material.uniforms.speed,
+          speed * 0.2,
+          0.06
+        );
         oldPos = aladino.y;
-      }
+      };
 
       update();
-    </script> 
+    </script>
   </body>
 </html>

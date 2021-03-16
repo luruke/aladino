@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>Aladino</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       html,
       body {
@@ -35,7 +35,7 @@
     </article>
 
     <script type="module">
-      import Aladino from '/src/index.js';
+      import Aladino from "./src/index.js";
 
       const aladino = new Aladino({
         density: 20,
@@ -96,8 +96,8 @@
         `,
       });
 
-      const el = document.querySelector('article');
-      const img = el.querySelector('img');
+      const el = document.querySelector("article");
+      const img = el.querySelector("img");
 
       aladino.carpet(el, {
         material,

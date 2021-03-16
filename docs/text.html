@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>Aladino</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       html,
       body {
@@ -39,13 +39,13 @@
   <body>
     <div class="wrapper">
       <article>
-        <img class="a" src="assets/images/4.jpg">
-        <img class="b" src="assets/images/3.jpg">
+        <img class="a" src="assets/images/4.jpg" />
+        <img class="b" src="assets/images/3.jpg" />
       </article>
     </div>
 
     <script type="module">
-      import Aladino from '/src/index.js';
+      import Aladino from "./src/index.js";
 
       const aladino = new Aladino({
         density: 20,
@@ -121,13 +121,13 @@
         `,
       });
 
-      const el = document.querySelector('article');
+      const el = document.querySelector("article");
 
       aladino.carpet(el, {
         material,
         uniforms: {
-          front: aladino.texture(el.querySelector('.a').src),
-          back: aladino.texture(el.querySelector('.b').src),
+          front: aladino.texture(el.querySelector(".a").src),
+          back: aladino.texture(el.querySelector(".b").src),
         },
       });
     </script>

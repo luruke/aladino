@@ -1,12 +1,13 @@
 <html>
   <head>
     <title>Aladino</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-      html, body {
+      html,
+      body {
         margin: 0;
         padding: 0;
-        font-family: 'Arial', serif;
+        font-family: "Arial", serif;
       }
 
       * {
@@ -39,7 +40,7 @@
       }
 
       button.aladino {
-        opacity: 1!important;
+        opacity: 1 !important;
         background: transparent;
       }
 
@@ -53,9 +54,8 @@
     </style>
   </head>
   <body>
-
     <div class="wrapper">
-      <div style="height: 50px;"></div>
+      <div style="height: 50px"></div>
       <h1>Hi there, this is a `button`:</h1>
 
       <button>
@@ -94,10 +94,13 @@
       </button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js" type="text/javascript"></script>
-    
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js"
+      type="text/javascript"
+    ></script>
+
     <script type="module">
-      import Aladino from '/src/index.js';
+      import Aladino from "./src/index.js";
 
       const aladino = new Aladino({
         density: 10,
@@ -105,17 +108,17 @@
 
       document.body.appendChild(aladino.canvas);
 
-      aladino.carpet(document.querySelector('.button-1'), {
-        material: aladino.material()
+      aladino.carpet(document.querySelector(".button-1"), {
+        material: aladino.material(),
       });
 
-      aladino.carpet(document.querySelector('.button-2'), {
+      aladino.carpet(document.querySelector(".button-2"), {
         material: aladino.material(),
         wireframe: true,
-        scale: [2, 1]
+        scale: [2, 1],
       });
 
-      aladino.carpet(document.querySelector('.button-3'), {
+      aladino.carpet(document.querySelector(".button-3"), {
         material: aladino.material({
           vertex: /* glsl */ `
           attribute vec2 position;
@@ -134,7 +137,7 @@
             gl_Position = projection * vec4(position * scale, p, 1.0);
           }
         `,
-        fragment: /* glsl */ `
+          fragment: /* glsl */ `
           precision highp float;
 
           varying vec2 vUv;
@@ -145,10 +148,10 @@
         `,
         }),
         position: [100, 0],
-        scale: [1.1, 1]
+        scale: [1.1, 1],
       });
 
-      aladino.carpet(document.querySelector('.button-4'), {
+      aladino.carpet(document.querySelector(".button-4"), {
         material: aladino.material({
           vertex: /* glsl */ `
             attribute vec2 position;
@@ -176,12 +179,14 @@
             }
           `,
           uniforms: {
-            image: aladino.texture(document.querySelector('.button-4').dataset.image)
-          }
+            image: aladino.texture(
+              document.querySelector(".button-4").dataset.image
+            ),
+          },
         }),
       });
 
-      const button5 = document.querySelector('.button-5');
+      const button5 = document.querySelector(".button-5");
       const carpet5 = aladino.carpet(button5, {
         material: aladino.material({
           vertex: /* glsl */ `
@@ -216,29 +221,29 @@
         }),
         uniforms: {
           hover: 0,
-        }
+        },
       });
 
-      button5.addEventListener('mouseenter', () => {
+      button5.addEventListener("mouseenter", () => {
         gsap.killTweensOf(carpet5.uniforms);
         gsap.to(carpet5.uniforms, {
           hover: 1,
           duration: 1,
-          ease: 'elastic.out(1, 0.3)',
+          ease: "elastic.out(1, 0.3)",
         });
       });
 
-      button5.addEventListener('mouseleave', () => {
+      button5.addEventListener("mouseleave", () => {
         gsap.killTweensOf(carpet5.uniforms);
         gsap.to(carpet5.uniforms, {
           hover: 0,
           duration: 2,
-          ease: 'elastic.out(1, 0.18)',
+          ease: "elastic.out(1, 0.18)",
         });
       });
 
       // Button 6
-      const button6 = document.querySelector('.button-6');
+      const button6 = document.querySelector(".button-6");
       const carpet6 = aladino.carpet(button6, {
         material: aladino.material({
           vertex: /* glsl */ `
@@ -255,7 +260,7 @@
               gl_Position = projection * pos;
             }
           `,
-        fragment: /* glsl */ `
+          fragment: /* glsl */ `
           precision highp float;
 
           uniform float time;
@@ -378,26 +383,26 @@
         }),
         uniforms: {
           hover: 0,
-        }
+        },
       });
 
-      button6.addEventListener('mouseenter', () => {
+      button6.addEventListener("mouseenter", () => {
         gsap.killTweensOf(carpet6.uniforms);
         gsap.to(carpet6.uniforms, {
           hover: 1,
           duration: 1,
-          ease: 'elastic.out(1, 0.3)',
+          ease: "elastic.out(1, 0.3)",
         });
       });
 
-      button6.addEventListener('mouseleave', () => {
+      button6.addEventListener("mouseleave", () => {
         gsap.killTweensOf(carpet6.uniforms);
         gsap.to(carpet6.uniforms, {
           hover: 0,
           duration: 2,
-          ease: 'elastic.out(1, 0.18)',
+          ease: "elastic.out(1, 0.18)",
         });
       });
-    </script> 
+    </script>
   </body>
 </html>

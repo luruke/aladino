@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>Aladino</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       html,
       body {
@@ -35,9 +35,9 @@
     </article>
 
     <script type="module">
-      import Aladino from '/src/index.js';
-      import Pointer from './assets/pointer.js';
-      import lerp from './assets/lerp.js';
+      import Aladino from "./src/index.js";
+      import Pointer from "./assets/pointer.js";
+      import lerp from "./assets/lerp.js";
 
       const pointer = new Pointer();
       const aladino = new Aladino({
@@ -110,12 +110,12 @@
         `,
       });
 
-      const el = document.querySelector('article');
+      const el = document.querySelector("article");
 
       const carpet = aladino.carpet(el, {
         material,
         uniforms: {
-          image: aladino.texture(el.querySelector('img').src),
+          image: aladino.texture(el.querySelector("img").src),
           speed: [0, 0],
         },
       });
@@ -125,15 +125,31 @@
       const update = () => {
         requestAnimationFrame(update);
 
-        carpet.position[0] = lerp(carpet.position[0], pointer.coords[0] - carpet.bounds.width / 2, .2);
-        carpet.position[1] = lerp(carpet.position[1], pointer.coords[1] - carpet.bounds.height / 2, .2);
+        carpet.position[0] = lerp(
+          carpet.position[0],
+          pointer.coords[0] - carpet.bounds.width / 2,
+          0.2
+        );
+        carpet.position[1] = lerp(
+          carpet.position[1],
+          pointer.coords[1] - carpet.bounds.height / 2,
+          0.2
+        );
 
-        carpet.uniforms.speed[0] = lerp(carpet.uniforms.speed[0], (carpet.position[0] - oldSpeed[0]) * 0.1, .7);
-        carpet.uniforms.speed[1] = lerp(carpet.uniforms.speed[1], (carpet.position[1] - oldSpeed[1]) * 0.1, .7);
+        carpet.uniforms.speed[0] = lerp(
+          carpet.uniforms.speed[0],
+          (carpet.position[0] - oldSpeed[0]) * 0.1,
+          0.7
+        );
+        carpet.uniforms.speed[1] = lerp(
+          carpet.uniforms.speed[1],
+          (carpet.position[1] - oldSpeed[1]) * 0.1,
+          0.7
+        );
 
         oldSpeed[0] = carpet.position[0];
         oldSpeed[1] = carpet.position[1];
-      }
+      };
 
       update();
     </script>

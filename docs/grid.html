@@ -1,10 +1,12 @@
 <html>
+  <head>
+    <title>Aladino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-  <title>Aladino</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/flickity@2/dist/flickity.min.css"
+    />
     <style>
       html,
       body {
@@ -16,7 +18,7 @@
       * {
         box-sizing: border-box;
       }
-      
+
       .wrapper {
         padding: 30px;
         columns: 4;
@@ -45,44 +47,46 @@
   </head>
 
   <body>
-    <div class="wrapper">
-    </div>
+    <div class="wrapper"></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js" type="text/javascript"></script>
-  <script type="module">
-    import Aladino from '/src/index.js';
-    import lerp from './assets/lerp.js';
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.5/gsap.min.js"
+      type="text/javascript"
+    ></script>
+    <script type="module">
+      import Aladino from "./src/index.js";
+      import lerp from "./assets/lerp.js";
 
-    const random = (min, max) => {
-      return Math.floor(Math.random() * (+max - +min)) + +min;
-    };
+      const random = (min, max) => {
+        return Math.floor(Math.random() * (+max - +min)) + +min;
+      };
 
-    const wrapper = document.querySelector('.wrapper');
-    for (let i = 0; i < 50; i++) {
-      const div = document.createElement('div');
-            div.classList.add('brick');
+      const wrapper = document.querySelector(".wrapper");
+      for (let i = 0; i < 50; i++) {
+        const div = document.createElement("div");
+        div.classList.add("brick");
 
-      const width = random(500, 900);
-      const height = random(800, 1000);
-      const img = document.createElement('img');
-            img.dataset.src = `https://source.unsplash.com/random/${width}x${height}`;
-            img.width = width;
-            img.height = height;
+        const width = random(500, 900);
+        const height = random(800, 1000);
+        const img = document.createElement("img");
+        img.dataset.src = `https://source.unsplash.com/random/${width}x${height}`;
+        img.width = width;
+        img.height = height;
 
-      div.style.paddingBottom = `${(height / width) * 100 }%`;
+        div.style.paddingBottom = `${(height / width) * 100}%`;
 
-      div.appendChild(img);
-      wrapper.appendChild(div);
-    }
+        div.appendChild(img);
+        wrapper.appendChild(div);
+      }
 
-    const aladino = new Aladino({
-      density: 10,
-    });
+      const aladino = new Aladino({
+        density: 10,
+      });
 
-    document.body.appendChild(aladino.canvas);
+      document.body.appendChild(aladino.canvas);
 
-    const material = aladino.material({
-      vertex: /* glsl */ `
+      const material = aladino.material({
+        vertex: /* glsl */ `
         attribute vec2 position;
         attribute vec2 uv;
 
@@ -119,7 +123,7 @@
           gl_Position = projection * pos;
         }
       `,
-      fragment: /* glsl */ `
+        fragment: /* glsl */ `
         precision highp float;
 
         uniform vec2 size;
@@ -160,62 +164,65 @@
           gl_FragColor = color;
         }
       `,
-      uniforms: {
-        speed: 0,
-        boarding: 0,
-      }
-    });
-
-    gsap.to(material.uniforms, {
-      boarding: 1,
-      duration: 7,
-      delay: 1,
-      ease: 'elastic.out(1, .1)'
-    });
-
-    const bricks = [...document.querySelectorAll('.brick')];
-    
-    bricks.forEach(brick => {
-      const image = aladino.texture(brick.querySelector('img').dataset.src);
-
-      const carpet = aladino.carpet(brick, {
-        material,
         uniforms: {
-          image,
-          show: 0,
-          scale: 0,
+          speed: 0,
+          boarding: 0,
         },
       });
 
-      image.loading.then(() => {
-        gsap.to(carpet.uniforms, {
-          show: 1,
-          duration: 2,
+      gsap.to(material.uniforms, {
+        boarding: 1,
+        duration: 7,
+        delay: 1,
+        ease: "elastic.out(1, .1)",
+      });
+
+      const bricks = [...document.querySelectorAll(".brick")];
+
+      bricks.forEach((brick) => {
+        const image = aladino.texture(brick.querySelector("img").dataset.src);
+
+        const carpet = aladino.carpet(brick, {
+          material,
+          uniforms: {
+            image,
+            show: 0,
+            scale: 0,
+          },
         });
 
-        gsap.to(carpet.uniforms, {
-          scale: 1,
-          duration: 5,
+        image.loading.then(() => {
+          gsap.to(carpet.uniforms, {
+            show: 1,
+            duration: 2,
+          });
+
+          gsap.to(carpet.uniforms, {
+            scale: 1,
+            duration: 5,
+          });
         });
-      })
-    });
+      });
 
-    let oldPos = aladino.y;
-    let speed = 0;
+      let oldPos = aladino.y;
+      let speed = 0;
 
-    const update = () => {
-      requestAnimationFrame(update);
+      const update = () => {
+        requestAnimationFrame(update);
 
-      // aladino.post.uniforms.speed = lerp(aladino.post.uniforms.speed, speed, .04);
-      // material.uniforms.speed = lerp(material.uniforms.speed, speed, .04);
+        // aladino.post.uniforms.speed = lerp(aladino.post.uniforms.speed, speed, .04);
+        // material.uniforms.speed = lerp(material.uniforms.speed, speed, .04);
 
-      speed = (aladino.y - oldPos) * .1;
-      material.uniforms.speed = lerp(material.uniforms.speed, speed * 0.2, .03);
-      oldPos = aladino.y;
-    }
+        speed = (aladino.y - oldPos) * 0.1;
+        material.uniforms.speed = lerp(
+          material.uniforms.speed,
+          speed * 0.2,
+          0.03
+        );
+        oldPos = aladino.y;
+      };
 
-    update();
-  </script>
-</body>
-
+      update();
+    </script>
+  </body>
 </html>

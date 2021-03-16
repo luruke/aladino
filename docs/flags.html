@@ -1,9 +1,10 @@
 <html>
   <head>
     <title>Aladino</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-      html, body {
+      html,
+      body {
         margin: 0;
         padding: 0;
         font-family: Arial;
@@ -34,21 +35,36 @@
     </style>
   </head>
   <body>
-
     <div class="wrapper">
-      <img src="assets/images/3.jpg">
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod, obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.</p>
-      <img src="assets/images/4.jpg">
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod, obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.</p>
-      <img src="assets/images/1.jpg">
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod, obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.</p>
-      <img src="assets/images/2.jpg">
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod, obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.</p>
-      <img src="assets/images/5.jpg">
+      <img src="assets/images/3.jpg" />
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae
+        adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod,
+        obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.
+      </p>
+      <img src="assets/images/4.jpg" />
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae
+        adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod,
+        obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.
+      </p>
+      <img src="assets/images/1.jpg" />
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae
+        adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod,
+        obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.
+      </p>
+      <img src="assets/images/2.jpg" />
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore vitae
+        adipisci numquam sequi, ab officiis accusamus tempora quasi minus quod,
+        obcaecati nam, harum laborum enim autem doloremque nulla sed mollitia.
+      </p>
+      <img src="assets/images/5.jpg" />
     </div>
 
     <script type="module">
-      import Aladino from '/src/index.js';
+      import Aladino from "./src/index.js";
 
       const aladino = new Aladino({
         density: 20,
@@ -56,7 +72,7 @@
 
       document.body.appendChild(aladino.canvas);
 
-      const imgs = [...document.querySelectorAll('img')];
+      const imgs = [...document.querySelectorAll("img")];
       const material = aladino.material({
         vertex: /* glsl */ `
           attribute vec2 position;
@@ -135,11 +151,10 @@
         `,
         uniforms: {
           uSpeed: 2.0,
-        }
+        },
       });
 
-
-      imgs.forEach(el => {
+      imgs.forEach((el) => {
         aladino.carpet(el, {
           material,
           uniforms: {
@@ -147,6 +162,6 @@
           },
         });
       });
-    </script> 
+    </script>
   </body>
 </html>
