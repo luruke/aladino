@@ -12,13 +12,11 @@ It was developed during some R&D time at [EPIC Agency](https://epic.net), back i
 - [https://days.epic.net](https://days.epic.net)
 - [https://luruke.com](https://luruke.com)
 
-<a href="https://luruke.github.io/aladino/">
-  <p float="left">
-    <img src="docs/assets/demo/1.gif" width="250" />
-    <img src="docs/assets/demo/2.gif" width="250" /> 
-    <img src="docs/assets/demo/3.gif" width="250" />
-  </p>
-</a>
+<p float="left">
+  <a href="https://luruke.github.io/aladino/#slider.html"><img src="docs/assets/demo/1.gif" width="250" /></a>
+  <a href="https://luruke.github.io/aladino/#scroll.html"><img src="docs/assets/demo/2.gif" width="250" /></a>
+  <a href="https://luruke.github.io/aladino/#basic.html"><img src="docs/assets/demo/3.gif" width="250" /></a>
+</p>
 
 ## 🤷‍ Even why?
 
