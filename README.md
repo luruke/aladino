@@ -1,4 +1,5 @@
 ⚠️⚠️ BETA! ⚠️⚠️
+(Most likely I won't maintain this...)
 
 # 🧞‍♂️ Aladino – your magic WebGL carpet
 
